@@ -1,0 +1,86 @@
+import pygame
+
+# Inicialização
+pygame.init()
+
+# Configurações da tela
+LARGURA, ALTURA = 800, 600
+TELA = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption("Parkour Game")
+
+# Cores
+BRANCO = (255, 255, 255)
+PRETO = (0, 0, 0)
+AZUL = (0, 100, 255)
+VERDE = (0, 200, 0)
+
+# Configuração do personagem
+personagem_largura = 40
+personagem_altura = 60
+x = 50
+y = ALTURA - personagem_altura - 50
+velocidade = 5
+gravidade = 1
+forca_pulo = -15
+vel_y = 0
+no_chao = False
+
+# Configuração das plataformas
+plataformas = [
+    pygame.Rect(50, ALTURA - 100, 200, 20),
+    pygame.Rect(300, ALTURA - 200, 200, 20),
+    pygame.Rect(550, ALTURA - 300, 200, 20),
+    pygame.Rect(400, ALTURA - 400, 200, 20),
+]
+
+# Loop principal
+rodando = True
+relogio = pygame.time.Clock()
+
+while rodando:
+    relogio.tick(30)
+    
+    # Eventos
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            rodando = False
+
+    # Movimento
+    teclas = pygame.key.get_pressed()
+    if teclas[pygame.K_LEFT]:
+        x -= velocidade
+    if teclas[pygame.K_RIGHT]:
+        x += velocidade
+    if teclas[pygame.K_SPACE] and no_chao:
+        vel_y = forca_pulo
+        no_chao = False
+
+    # Aplicar gravidade
+    vel_y += gravidade
+    y += vel_y
+
+    # Colisão com o chão
+    if y + personagem_height >= ALTURA:
+        y = ALTURA - personagem_height
+        vel_y = 0
+        no_chao = True
+
+    # Colisão com plataformas
+    for plataforma in plataformas:
+        if (y + personagem_altura >= plataforma.top and
+            y + personagem_altura <= plataforma.top + 10 and
+            x + personagem_largura > plataforma.left and
+            x < plataforma.right):
+            y = plataforma.top - personagem_altura
+            vel_y = 0
+            no_chao = True
+
+    # Desenhar elementos
+    TELA.fill(BRANCO)
+    pygame.draw.rect(TELA, AZUL, (x, y, personagem_largura, personagem_altura))  # Personagem
+    for plataforma in plataformas:
+        pygame.draw.rect(TELA, VERDE, plataforma)  # Plataformas
+
+    pygame.display.update()
+
+pygame.quit()
